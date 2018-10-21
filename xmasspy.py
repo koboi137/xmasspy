@@ -10,8 +10,9 @@ import os, base64, re, json, subprocess
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 file = open('domain.txt', 'r').read().split('\n')
 user_agent = {'User-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}
+os.system('export LD_PRELOAD=/lib/x86_64-linux-gnu/libgcc_s.so.1')
 x = subprocess.getoutput('ulimit -n')
-if int(x) <= 1024: y = subprocess.getoutput('ulimit -n 16384')
+if int(x) <= 16384: y = subprocess.getoutput('ulimit -n 16384')
 else: pass
 
 class cl:
@@ -250,6 +251,12 @@ def rikues(line):
 	gravityform(line + 'wordpress/')
 	gravityform(line + 'blog/')
 
+def prog():
+	sys.stdout.flush()
+	sys.stdout.write('| {} | [+] Wait a moment ...\r'.format(datetime.now().strftime('%H:%M:%S')))
+	sys.stdout.flush()
+	sys.stdout.write('| {} | [x] Wait a moment ...\r'.format(datetime.now().strftime('%H:%M:%S')))
+
 no = 0
 lcount = sum(1 for line in open('domain.txt'))
 print('__  ____  __               ____')
@@ -268,7 +275,6 @@ for line in file:
 	try:
 		t = threading.Thread(target=rikues, args=(line,))
 		t.start()
-		#rikues(line)
 		no = no + 1
 		jumlah = ( no * 100 ) / lcount
 		sys.stdout.flush()
@@ -276,10 +282,16 @@ for line in file:
 		sys.stdout.flush()
 	except(KeyboardInterrupt,SystemExit):
 		print('\r| {} | Exiting program ...'.format(datetime.now().strftime('%H:%M:%S')))
-		sleep(3)
 		print('===============================================================================')
-		sys.exit()
+		os.system('kill -9 {}'.format(os.getpid()))
 
 while True:
-	sleep(3); cek = threading.active_count()
-	if cek == 1: print('==============================================================================='); exit()
+	try:
+		prog()
+		cek = threading.active_count()
+		if cek == 1: print('==============================================================================='); exit()
+
+	except KeyboardInterrupt:
+		print('\r| {} | Exiting program ...'.format(datetime.now().strftime('%H:%M:%S')))
+		print('===============================================================================')
+		os.system('kill -9 {}'.format(os.getpid()))
