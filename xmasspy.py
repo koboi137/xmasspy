@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# Description : XMassPy
-# Author : Koboi137 ( Backbox Indonesia )
 
 from datetime import datetime
 from time import sleep, strftime
